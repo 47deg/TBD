@@ -11,7 +11,12 @@ addCommandAlias("ci-publish", "github; ci-release")
 publish / skip := true
 
 lazy val root =
-  (project in file("./")).aggregate(`scala-fx`, benchmarks, `munit-scala-fx`, documentation)
+  (project in file("./")).aggregate(
+    `scala-fx`,
+    benchmarks,
+    `munit-scala-fx`,
+    `http-scala-fx`,
+    documentation)
 
 lazy val `scala-fx` = project.settings(scalafxSettings: _*)
 
@@ -30,6 +35,10 @@ lazy val `munit-scala-fx` = (project in file("./munit-scalafx"))
     munitScalaFXSettings
   )
   .dependsOn(`scala-fx`)
+
+lazy val `http-scala-fx` = (project in file("./http-scala-fx"))
+  .settings(httpScalaFXSettings)
+  .dependsOn(`scala-fx`, `munit-scala-fx` % "test -> compile")
 
 lazy val scalafxSettings: Seq[Def.Setting[_]] =
   Seq(
@@ -52,6 +61,13 @@ lazy val munitScalaFXSettings = Defaults.itSettings ++ Seq(
     junitInterface
   )
 )
+
+lazy val httpScalaFXSettings = Seq(
+  Test / fork := true,
+  javaOptions ++= javaOptionsSettings,
+  autoAPIMappings := true
+)
+
 
 lazy val javaOptionsSettings = Seq(
   "-XX:+IgnoreUnrecognizedVMOptions",
